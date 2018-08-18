@@ -14,7 +14,19 @@ public class MyConnection
 	private static String dbURL = "jdbc:mysql://localhost:3306/library";
 	private static String driver = "com.mysql.jdbc.Driver";
 	
-	public static Connection getConnection() throws PropertyVetoException, SQLException
+	private static MyConnection instance;
+	
+	public static MyConnection getInstance()
+	{
+		if (instance == null)
+		{
+			instance = new MyConnection();
+		}
+		
+		return instance;
+	}
+	
+	public Connection getConnection() throws PropertyVetoException, SQLException
 	{
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		

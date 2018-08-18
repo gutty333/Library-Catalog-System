@@ -12,11 +12,11 @@ import com.Entity.Patron;
 public class PatronDAO
 {
 	// method for retrieve a patron through email and password input fields
-	public static Patron getPatron(String email, String password)
+	public static Patron getPatron(String email, String password, MyConnection instance)
 	{
 		Patron current = null;
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "select * from patron where email=? and password=?";
 			
@@ -51,9 +51,9 @@ public class PatronDAO
 	}
 
 	// method to check if an account already exist by analyzing the email
-	public static boolean accountExist(String email)
+	public static boolean accountExist(String email, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "select * from patron where email=?";
 			
@@ -81,9 +81,9 @@ public class PatronDAO
 	}
 
 	// method for inserting a new patron into our database
-	public static void insertPatron(Patron current)
+	public static void insertPatron(Patron current, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "INSERT INTO patron (`FirstName`, `LastName`, `Email`, `Password`) VALUES (?, ?, ?, ?)";
 			
@@ -108,11 +108,11 @@ public class PatronDAO
 	}
 
 	// method to reprieve a patron through their ID
-	public static Patron getPatron(int id)
+	public static Patron getPatron(int id, MyConnection instance)
 	{
 		Patron current = null;
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "select * from patron where ID=?";
 			
@@ -146,9 +146,9 @@ public class PatronDAO
 	}
 
 	// method charging the current patron with the calculated late fees
-	public static void chargePatron(int patronID, double fine)
+	public static void chargePatron(int patronID, double fine, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "UPDATE `patron` SET `TotalFines`=? WHERE `ID`=?";
 			

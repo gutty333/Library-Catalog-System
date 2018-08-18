@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.Connection.MyConnection;
 import com.DAO.BookDAO;
 import com.DAO.PatronDAO;
 import com.Entity.Book;
@@ -25,14 +26,23 @@ public class BookController extends HttpServlet {
 	
 	private static final int DATE_POLICY = 7;
 	private static final double LATE_FEE = .50;
-       
+	
+	private MyConnection instance;
+	
+	// default constructor
+	public BookController()
+	{
+		instance = MyConnection.getInstance();
+	}
+	   
+	// get method
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		String command = request.getParameter("command");
 		
 		// section to keep track of our current patron
 		int patronID = Integer.parseInt(request.getParameter("patronID"));
-		Patron currentPatron = PatronDAO.getPatron(patronID);
+		Patron currentPatron = PatronDAO.getPatron(patronID, instance);
 		
 		
 		if (command != null && command.equals("TAKE"))
@@ -74,7 +84,7 @@ public class BookController extends HttpServlet {
 		LocalDate returnDate = LocalDate.now();
 		
 		// getting the check out date
-		LocalDate checkOutDate = BookDAO.getCheckOutDate(patronID, bookID);
+		LocalDate checkOutDate = BookDAO.getCheckOutDate(patronID, bookID, instance);
 		
 		String message = null;
 		String message2 = null;
@@ -82,13 +92,13 @@ public class BookController extends HttpServlet {
 		if (checkOutDate != null)
 		{
 			// deleting the patron book pair record
-			BookDAO.deleteRecord(patronID,bookID);
+			BookDAO.deleteRecord(patronID,bookID, instance);
 			
 			// updating the book availability flag
-			BookDAO.bookIsAvailable(bookID);
+			BookDAO.bookIsAvailable(bookID, instance);
 			
 			// get the selected book
-			Book returnedBook = BookDAO.getBook(bookID);
+			Book returnedBook = BookDAO.getBook(bookID, instance);
 			
 			// getting the difference between the 2 dates
 			// recall a patron can only hold a material for 7 days at most
@@ -117,7 +127,7 @@ public class BookController extends HttpServlet {
 				DecimalFormat decimalPrecision = new DecimalFormat(".00");
 				
 				// charge the patron with the late fine
-				PatronDAO.chargePatron(patronID, totalFines);
+				PatronDAO.chargePatron(patronID, totalFines, instance);
 				
 				message2 = "This book was returned " + (totalDays - DATE_POLICY) + " day/s late, you will be charged $" + decimalPrecision.format(fine);
 			}
@@ -128,7 +138,7 @@ public class BookController extends HttpServlet {
 		}
 
 		// get the updated list of books for the current patron
-		List<Book> myBooks = BookDAO.myBooks(patronID);
+		List<Book> myBooks = BookDAO.myBooks(patronID, instance);
 		
 		// setting the page attributes
 		request.setAttribute("patron", currentPatron);
@@ -149,7 +159,7 @@ public class BookController extends HttpServlet {
 	private void patronBooks(HttpServletRequest request, HttpServletResponse response, int patronID,
 			Patron currentPatron) throws ServletException, IOException
 	{
-		List<Book>bookList = BookDAO.myBooks(patronID);
+		List<Book>bookList = BookDAO.myBooks(patronID, instance);
 		
 		request.setAttribute("patron", currentPatron);
 		request.setAttribute("books", bookList);
@@ -167,10 +177,10 @@ public class BookController extends HttpServlet {
 		int bookID = Integer.parseInt(request.getParameter("bookID"));
 		
 		// providing the book to the patron and saving the record
-		BookDAO.bookTakeOut(patronID,bookID);
+		BookDAO.bookTakeOut(patronID,bookID, instance);
 		
 		// updating the availability for the current book
-		BookDAO.bookNotAvailable(bookID);
+		BookDAO.bookNotAvailable(bookID, instance);
 		
 		// back to catalog
 		searchCatalog(request, response, current);
@@ -194,22 +204,22 @@ public class BookController extends HttpServlet {
 		if ((searchInput == null && genre == null) || (searchInput.isEmpty() && genre.equals("Select Genre")))
 		{
 			// show all the books
-			bookList = BookDAO.getBooks();
+			bookList = BookDAO.getBooks(instance);
 		}
 		else if (searchInput.length() > 0 && !genre.equals("Select Genre"))
 		{
 			// show books based on the filters provided
-			bookList = BookDAO.getBooks(searchInput, genre);
+			bookList = BookDAO.getBooks(searchInput, genre, instance);
 		}
 		else if (!genre.equals("Select Genre"))
 		{
 			// show books based on the genre 
-			bookList = BookDAO.getBooksGenre(genre);
+			bookList = BookDAO.getBooksGenre(genre, instance);
 		}
 		else if (searchInput.length() > 0)
 		{
 			// show books based on the search field provided
-			bookList = BookDAO.getBooks(searchInput);
+			bookList = BookDAO.getBooks(searchInput, instance);
 		}
 		
 		// adding the attributes
@@ -230,7 +240,7 @@ public class BookController extends HttpServlet {
 	{
 		// get the selected book
 		int bookID = Integer.parseInt(request.getParameter("bookID"));
-		Book selectedBook = BookDAO.getBook(bookID);
+		Book selectedBook = BookDAO.getBook(bookID, instance);
 		
 		// setting up the return date
 		// note all books must be returned within 7 days after their check out date
@@ -248,6 +258,7 @@ public class BookController extends HttpServlet {
 	}
 
 	
+	// post method
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		

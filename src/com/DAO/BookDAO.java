@@ -15,11 +15,11 @@ import com.Entity.Book;
 public class BookDAO
 {
 	// retrieve all the books
-	public static List<Book> getBooks()
+	public static List<Book> getBooks(MyConnection instance)
 	{
 		List<Book> bookList = new ArrayList<>();
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "select * from book";
 			
@@ -51,11 +51,11 @@ public class BookDAO
 	}
 
 	// get books based on the provided filters
-	public static List<Book> getBooks(String searchInput, String genre)
+	public static List<Book> getBooks(String searchInput, String genre, MyConnection instance)
 	{
 		List<Book> bookList = new ArrayList<>();
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			// search query to handle patron's input
 			String query = "SELECT * from book where (Title like ? or Author like ?) and Genre=?";
@@ -99,11 +99,11 @@ public class BookDAO
 	}
 
 	// get books based on the genre only
-	public static List<Book> getBooksGenre(String genre)
+	public static List<Book> getBooksGenre(String genre, MyConnection instance)
 	{
 		List<Book> bookList = new ArrayList<>();
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			// search query to handle patron's input
 			String query = "SELECT * from book where genre=?";
@@ -139,11 +139,11 @@ public class BookDAO
 	}
 	
 	// get books by title or author only
-	public static List<Book> getBooks(String searchInput)
+	public static List<Book> getBooks(String searchInput, MyConnection instance)
 	{
 		List<Book> bookList = new ArrayList<>();
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			// search query to handle patron's input
 			String query = "SELECT * from book where Title like ? or Author like ?";
@@ -185,11 +185,11 @@ public class BookDAO
 	}
 
 	// method to return a book based on the ID
-	public static Book getBook(int bookID)
+	public static Book getBook(int bookID, MyConnection instance)
 	{
 		Book myBook =  null;
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "select * from book where ID=?";
 			
@@ -224,9 +224,9 @@ public class BookDAO
 
 	// method to keep track of which patron has taken the specified book
 	// makes a new pair between the patron and book
-	public static void bookTakeOut(int patronID, int bookID)
+	public static void bookTakeOut(int patronID, int bookID, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "INSERT INTO patron_book (`PatronID`, `BookID`) VALUES (?, ?)";
 			
@@ -248,9 +248,9 @@ public class BookDAO
 	}
 
 	// method to signal that the book is available in the library after being returned
-	public static void bookIsAvailable(int bookID)
+	public static void bookIsAvailable(int bookID, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "UPDATE book SET `Available`='1' WHERE `ID`=?";
 			
@@ -271,9 +271,9 @@ public class BookDAO
 	}
 		
 	// method to update the availability of a book when is taken out by a patron
-	public static void bookNotAvailable(int bookID)
+	public static void bookNotAvailable(int bookID, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "UPDATE book SET `Available`='0' WHERE `ID`=?";
 			
@@ -294,11 +294,11 @@ public class BookDAO
 	}
 
 	// method to return all the books checked out by the specified patron
-	public static List<Book> myBooks(int patronID)
+	public static List<Book> myBooks(int patronID, MyConnection instance)
 	{
 		List<Book> myList = new ArrayList<>();
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			// query to only target the books this patron has 
 			// we reference the pair table which stores a record of all activities
@@ -336,11 +336,11 @@ public class BookDAO
 	}
 	
 	// method to return the date for when the patron checked out the specified book
-	public static LocalDate getCheckOutDate(int patronID, int bookID)
+	public static LocalDate getCheckOutDate(int patronID, int bookID, MyConnection instance)
 	{
 		LocalDate checkOutDate = null;
 		
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			String query = "SELECT TakenOut FROM patron_book where PatronID = ? and BookID = ?";
 			
@@ -369,9 +369,9 @@ public class BookDAO
 	}
 
 	// method to delete the pair record once the patron returns the book
-	public static void deleteRecord(int patronID, int bookID)
+	public static void deleteRecord(int patronID, int bookID, MyConnection instance)
 	{
-		try(Connection connection = MyConnection.getConnection())
+		try(Connection connection = instance.getConnection())
 		{
 			// query to first get the pair ID
 			String query = "SELECT * FROM patron_book WHERE patron_book.PatronID=? and patron_book.BookID=?";

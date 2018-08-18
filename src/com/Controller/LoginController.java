@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.Connection.MyConnection;
 import com.DAO.PatronDAO;
 import com.Entity.Patron;
 
@@ -22,6 +23,15 @@ public class LoginController extends HttpServlet
 	private static String password;
 	private static String error;
 	
+	private MyConnection instance;
+	
+	// default constructor
+	public LoginController()
+	{
+		instance = MyConnection.getInstance();
+	}
+	
+	// get method
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		String command = request.getParameter("command");
@@ -29,7 +39,7 @@ public class LoginController extends HttpServlet
 		if (command.equals("PASS"))
 		{
 			// getting the patron data from database
-			Patron current = PatronDAO.getPatron(email, password);
+			Patron current = PatronDAO.getPatron(email, password, instance);
 			
 			// setting up our patron model
 			request.setAttribute("patron", current);
@@ -51,6 +61,7 @@ public class LoginController extends HttpServlet
 	}
 
 
+	// post method
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		// getting the user's input
@@ -64,7 +75,7 @@ public class LoginController extends HttpServlet
 			error = "Please fill out all the fields";
 			sendError(error, request, response);
 		}
-		else if (PatronDAO.getPatron(email, password) == null)
+		else if (PatronDAO.getPatron(email, password, instance) == null)
 		{
 			// error when invalid email or password is entered
 			error = "Invalid email or password";

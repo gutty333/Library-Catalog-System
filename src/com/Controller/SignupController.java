@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.Connection.MyConnection;
 import com.DAO.PatronDAO;
 import com.Entity.Patron;
 
@@ -23,7 +24,16 @@ public class SignupController extends HttpServlet {
 	private static String email;
 	private static String password;
 	
+	private MyConnection instance;
 	
+	// default constructor
+	public SignupController()
+	{
+		instance = MyConnection.getInstance();
+	}
+	
+	
+	// get method
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		String command = request.getParameter("command");
@@ -38,9 +48,9 @@ public class SignupController extends HttpServlet {
 			current.setPassword(password);
 			
 			// inserting the current patron into our database
-			PatronDAO.insertPatron(current);
+			PatronDAO.insertPatron(current, instance);
 			
-			current = PatronDAO.getPatron(email, password);
+			current = PatronDAO.getPatron(email, password, instance);
 			
 			// adding it as an attribute
 			request.setAttribute("patron", current);
@@ -61,7 +71,8 @@ public class SignupController extends HttpServlet {
 		}
 	}
 
-
+	
+	// post method
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		// getting the user's input
@@ -77,7 +88,7 @@ public class SignupController extends HttpServlet {
 			error = "Please fill out all the fields";
 			sendError(error, request, response);
 		}
-		else if (PatronDAO.accountExist(email))
+		else if (PatronDAO.accountExist(email, instance))
 		{
 			// error when an already existing email is provided during account creation
 			error = "An account already exist with that email";
